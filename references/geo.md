@@ -28,19 +28,40 @@
 
 ## 2. AI 크롤러 정책 결정
 
-robots.txt에서 명시적으로 결정하라 (기본 무정책 = 우연에 맡기는 것):
+AI 크롤러는 **용도가 세 종류**고, robots.txt 정책은 용도별로 나눠 짜야 한다.
+기본 무정책 = 우연에 맡기는 것:
+
+| 용도 | 대표 User-agent | 막으면 잃는 것 |
+|---|---|---|
+| **학습** (모델 훈련 데이터 수집) | GPTBot, ClaudeBot, Google-Extended, CCBot, Applebot-Extended | 미래 모델의 브랜드 인지 (LLMO) |
+| **검색 색인** (AI 검색의 자체 인덱스) | OAI-SearchBot, Claude-SearchBot, PerplexityBot | ChatGPT·Claude·Perplexity 검색 인용 |
+| **실시간 fetch** (사용자 질문 시 페이지 열람) | ChatGPT-User, Perplexity-User, Claude-User | 답변 시점의 직접 인용·트래픽 |
 
 ```
+# 인용 유입이 목표라면 전부 Allow가 기본값
 User-agent: GPTBot
 Allow: /
-User-agent: PerplexityBot
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
 Allow: /
 User-agent: ClaudeBot
 Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
 ```
 
-인용 유입을 원하면 Allow가 기본값이다. 콘텐츠가 자산이라 학습만 막고 싶다면
-검색용(OAI-SearchBot 등)과 학습용(GPTBot)을 구분해서 정책을 나눠라.
+콘텐츠가 자산이라 **학습만** 막고 싶다면 첫 행(학습용)만 Disallow — 검색·fetch를 같이
+막으면 인용 유입 자체가 죽는다. 명단은 변한다 — 각사 크롤러 문서를 분기마다 확인하라.
+
+- [ ] **Bing 색인 확인**: ChatGPT 검색은 자체 크롤러에 더해 Bing 색인에 의존한다.
+      Bing Webmaster Tools 등록이 안 돼 있으면 `references/aeo.md`의 0번부터 하라
 
 ## 3. 1차 소스 되기 — GEO의 본체
 

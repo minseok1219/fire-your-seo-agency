@@ -11,7 +11,16 @@
 - 네이버 서치어드바이저: 콘텐츠 노출/클릭, 검색어 Top 목록
 - AI 인용: 대상 질문 5~10개를 Perplexity·ChatGPT·네이버 AI 브리핑에 실제로 던져
   출처 인용 여부를 O/X로 기록
-- 색인 수: `site:도메인` 결과 수 + GSC 색인 페이지 수
+- 색인 수: `site:도메인` 결과 수 + GSC 색인 페이지 수 (Bing도 `site:`로 확인)
+- **AI 크롤러 방문 수**: 서버 로그에서 GPTBot·PerplexityBot·ClaudeBot 등의 방문 추이.
+  크롤링이 와야 인용이 온다 — 인용보다 먼저 움직이는 선행 지표다
+
+```bash
+# 접근 로그에서 AI 크롤러 방문 집계 (선행 지표)
+grep -iE 'GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-User|PerplexityBot' access.log \
+  | awk '{print $1}' | wc -l
+# 로그 접근이 없으면: Cloudflare/Vercel 등 호스팅 대시보드의 봇 트래픽 분류로 대체
+```
 
 ## 2. 재측정 일정 — 작업의 일부다
 

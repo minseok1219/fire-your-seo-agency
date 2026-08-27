@@ -40,6 +40,15 @@
 
 ## 설치
 
+플러그인으로 (권장 — 한 줄 설치, 업데이트 쉬움):
+
+```
+/plugin marketplace add leopard627/fire-your-seo-agency
+/plugin install fire-your-seo-agency@fire-your-seo-agency
+```
+
+또는 git clone으로:
+
 ```bash
 # 프로젝트 스킬로 (해당 프로젝트에서만)
 git clone https://github.com/leopard627/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
@@ -53,6 +62,18 @@ git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skill
 ```
 /fire-your-seo-agency 내 사이트 진단해줘
 ```
+
+에이전트는 손대기 전에 크롤러의 눈으로 진단부터 하고, 이런 점수표를 먼저 보여줍니다:
+
+| 레인 | 상태 | 근거 |
+|---|---|---|
+| SEO | ⚠️ | 본문은 SSR이나 상세 페이지 214건이 사이트맵에 누락 |
+| AEO | ❌ | 첫 문단 직답 없음, FAQ 구조화 데이터 0건 |
+| GEO | ❌ | llms.txt 없음, robots.txt에 AI 크롤러 정책 미정 |
+| LLMO | ⚠️ | 브랜드명 표기가 표면마다 3가지로 갈림 |
+| NEO | ❌ | 네이버 서치어드바이저 미등록 |
+
+…그다음 우선순위를 제안하고, 구현하고, 재측정 일정을 잡습니다.
 
 ## 무엇을 하나
 
@@ -78,12 +99,17 @@ git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skill
 SKILL.md              ← 에이전트 운영 절차 (진단 → 구현 → 측정)
 references/
   seo.md              ← 기술 SEO 체크리스트 + 실전 함정
-  aeo.md              ← 답변엔진 최적화 (AI Overviews·Copilot)
-  geo.md              ← 생성엔진 최적화 (ChatGPT·Perplexity) + llms.txt
+  aeo.md              ← 답변엔진 최적화 (Bing 등록·AI Overviews·Copilot·E-E-A-T)
+  geo.md              ← 생성엔진 최적화 (AI 크롤러 정책·llms.txt·1차 소스)
   llmo.md             ← 모델 인지 최적화 (브랜드 엔티티)
   neo-naver.md        ← 네이버 (서치어드바이저·AI 브리핑·블로그 투트랙)
   measure.md          ← 측정 루프 (고치고 끝이 아니다)
+  en/                 ← 전체 레퍼런스 영문 미러 (사람 독자용)
+.claude-plugin/       ← 플러그인·마켓플레이스 매니페스트 (/plugin 설치 지원)
 ```
+
+> `references/`의 한국어 문서가 정본이고(에이전트가 읽는 것), `references/en/`은
+> 사람 독자를 위한 영문 미러입니다.
 
 ## 라이선스
 

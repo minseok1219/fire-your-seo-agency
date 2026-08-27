@@ -42,6 +42,15 @@ but if you serve the Korean market, half your traffic lives there.
 
 ## Install
 
+As a plugin (recommended — one command, easy updates):
+
+```
+/plugin marketplace add leopard627/fire-your-seo-agency
+/plugin install fire-your-seo-agency@fire-your-seo-agency
+```
+
+Or via git clone:
+
 ```bash
 # As a project skill (this project only)
 git clone https://github.com/leopard627/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
@@ -55,6 +64,19 @@ Then in Claude Code:
 ```
 /fire-your-seo-agency audit my site
 ```
+
+Your agent starts with a crawler-eye audit and returns a scorecard like this before
+touching anything:
+
+| Lane | Status | Evidence |
+|---|---|---|
+| SEO | ⚠️ | Body is SSR'd, but 214 detail pages missing from sitemap |
+| AEO | ❌ | No direct-answer first paragraphs; FAQ structured data: 0 |
+| GEO | ❌ | No llms.txt; GPTBot/PerplexityBot policy undecided in robots.txt |
+| LLMO | ⚠️ | Brand name spelled 3 different ways across surfaces |
+| NEO | ❌ | Not registered in Naver Search Advisor |
+
+…then proposes priorities, implements them, and schedules the re-measurement.
 
 ## What it does
 
@@ -80,15 +102,17 @@ Become the primary source for a number, and the citations follow.
 SKILL.md              ← agent operating procedure (audit → implement → measure)
 references/
   seo.md              ← technical SEO checklist + real-world traps
-  aeo.md              ← answer engine optimization (AI Overviews · Copilot)
-  geo.md              ← generative engine optimization (ChatGPT · Perplexity) + llms.txt
+  aeo.md              ← answer engine optimization (Bing WMT · AI Overviews · Copilot · E-E-A-T)
+  geo.md              ← generative engine optimization (AI crawler policy · llms.txt · primary source)
   llmo.md             ← model-knowledge optimization (brand entity)
   neo-naver.md        ← Naver (Search Advisor · AI Briefing · blog two-track)
   measure.md          ← the measurement loop (fixing it is not the finish line)
+  en/                 ← English mirrors of all reference docs (for human readers)
+.claude-plugin/       ← plugin & marketplace manifests (/plugin install support)
 ```
 
-> Note: reference documents are currently written in Korean — the checklists and code
-> examples are language-agnostic, and your agent reads Korean just fine.
+> The Korean documents under `references/` are canonical (the agent reads those);
+> `references/en/` mirrors them in English for human readers.
 
 ## License
 
