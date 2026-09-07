@@ -7,8 +7,8 @@ control**, through the crawler's eyes. Three goals: ① Place search ranking ②
 the card in AI Briefing / Map local answers ③ converting from the card to call / booking / chat.
 
 > Naver's ranking logic is private. This lane never promises "fix this and rank higher".
-> Instead it fills **every item Naver itself flags as missing** plus **every signal measurable
-> on the public page**, then re-measures with Smart Place Center statistics.
+> Instead it fills **every signal measurable from real fields on the public page**, then
+> re-measures with Smart Place Center statistics.
 
 ## 0. Crawler-eye audit — run the script first
 
@@ -25,8 +25,9 @@ What the script reads (fields confirmed SSR-exposed as of 2026-09):
 
 | Field | Apollo key | What it tells you |
 |---|---|---|
-| `missingInfo.is*Missing` | PlaceDetailBase | **Naver's own missing-info flags** — top priority |
-| `openingHours` / `hideBusinessHours` | PlaceDetailBase | business hours present? |
+| `placeDetail.newBusinessHours` | ROOT_QUERY | **the real business hours** — per-day times · regular closures · temporary closures · open/closed status |
+| `missingInfo.is*Missing` | PlaceDetailBase | Naver's missing-info flags. ⚠️ `isBizHourMissing` keys off the legacy field and reads true even when hours exist (observed false positive) — informational only |
+| `openingHours` | PlaceDetailBase | legacy hours field, usually null — never judge on it |
 | `roadAddress` / `road` | PlaceDetailBase | address · directions |
 | `virtualPhone` / `phone` / `talktalkUrl` | PlaceDetailBase | conversion paths (SmartCall · TalkTalk) |
 | `conveniences` / `paymentInfo` | PlaceDetailBase | amenities · payment methods |
@@ -44,15 +45,19 @@ Place Center (smartplace.naver.com) yourself or ask the user for a screenshot.
 ⚠️ Naver's markup changes without notice. If a whole field comes back empty, it may be a
 parse failure rather than a real gap — cross-check in a browser once, and fix the script.
 
-## 1. Basic info completeness — zero missing flags is the baseline
+## 1. Basic info completeness — judge on the real fields
 
-- [ ] **Clear every `missingInfo` flag**: `isBizHourMissing` (hours), `isMenuImageMissing`
-      (product images), `isDescriptionMissing`, `isConveniencesMissing`. These are Naver's own
-      definition of an "under-filled business" — do them before anything else
-- [ ] **Business hours**: per weekday + breaks + regular closures. Class-based businesses (gyms):
-      put the class timetable in the description or a product image, and list door-open hours
-      as business hours. Empty hours drop you from "open now" filters and AI answers say
-      "hours not available"
+- [ ] **Hours for 7/7 days**: per-weekday times + breaks + regular closures, all filled. An empty
+      weekday is "not entered", not "closed" — mark rest days as regular closures explicitly.
+      Empty hours drop you from "open now" filters and AI answers say "hours not available".
+      Class-based businesses (gyms): door-open hours here, the class timetable in the
+      description or a product image
+- [ ] **Register temporary closures in hours too** (`comingIrregularClosedDays`): a holiday or
+      competition closure posted only as news leaves the card's "open now" badge wrong
+- [ ] **`missingInfo` flags are informational only**: if `isMenuImageMissing`,
+      `isDescriptionMissing` or `isConveniencesMissing` is true, cross-check in Center. But
+      `isBizHourMissing` was observed true on a business with hours fully registered —
+      **never mark ❌ on the flag alone**. The script does not use it for scoring
 - [ ] **Category**: does the primary category match the real business? (Registering a CrossFit
       box as "gym" is correct when Naver has no CrossFit category — use the parent + description
       and keywords to compensate)
@@ -162,8 +167,8 @@ to the character on every surface**:
 
 Place has no API like Search Advisor. Measure on two layers:
 
-1. **Public signals (script, automatic)**: visitor review count · latest review date · 90-day
-   news count · missing flags. Save `--json` output per date and diff
+1. **Public signals (script, automatic)**: days with hours entered · priced products · visitor
+   review count · 90-day news count. Save `--json` output per date and diff
 2. **Center statistics (manual, weekly)**: Place views, top inbound search terms, call ·
    directions · booking · TalkTalk clicks. **The top inbound terms are your keyword candidate
    list** — a top term not among your 5 keywords = the next keyword to add
@@ -172,8 +177,8 @@ Place has no API like Search Advisor. Measure on two layers:
    re-measure **from the same place at the same time of day** or the comparison is meaningless
 
 ```
-[baseline]  9/7: missing flags 1 (hours) · visitor reviews 127 · 90-day news 5 · "Geoyeo crossfit" rank 2
-[change]    9/8: hours registered + 5 keywords + free-trial booking product + 8 business photos refreshed
+[baseline]  9/7: hours 7/7 · prices 3/6 · visitor reviews 127 · 90-day news 5 · "Geoyeo crossfit" rank 2
+[change]    9/8: 5 keywords + numeric prices + free-trial booking product on line 1 + 8 business photos refreshed
 [re-measure booked] 9/22
-[re-measure result] missing 0 · reviews 134 · news 8 · rank 1 · booking clicks 12 → 31   ← this is what "done" looks like
+[re-measure result] prices 6/6 · reviews 134 · news 8 · rank 1 · booking clicks 12 → 31   ← this is what "done" looks like
 ```

@@ -85,10 +85,28 @@ def audit(place_id):
     themes = (first(home, "VisitorReviewStatsResult:").get("analysis") or {}).get("themes") or []
     menus = [v for k, v in home.items() if k.startswith("Menu:")]
     photos = [v for k, v in home.items() if k.startswith("PlaceDetailTopPhotoItem:")]
-    tabs = []
+    tabs, hours = [], {}
     for k, v in (home.get("ROOT_QUERY") or {}).items():
         if k.startswith("placeDetail(") and isinstance(v, dict):
             tabs = [t.get("tabId") for t in v.get("tabs", [])]
+            # 영업시간은 PlaceDetailBase.openingHours(구 필드, 보통 null)가 아니라 여기 newBusinessHours에 있다.
+            # 실측 2026-09: 영업시간이 등록된 업체도 missingInfo.isBizHourMissing=true → 그 플래그는 믿지 않는다.
+            nbh = (v.get("newBusinessHours") or [None])[0] or {}
+            days = []
+            for d in nbh.get("businessHours") or []:
+                se = d.get("businessHours") or {}
+                if se.get("start"):
+                    days.append({"day": d.get("day"), "hours": f"{se['start']}-{se['end']}"})
+                else:
+                    days.append({"day": d.get("day"), "hours": None, "note": d.get("description")})
+            hours = {
+                "status": (nbh.get("businessStatusDescription") or {}).get("status"),
+                "days": days,
+                "days_filled": sum(1 for d in days if d["hours"] or d.get("note")),
+                "irregular_closures": [f"{c.get('name')} {c.get('startDate')}~{c.get('endDate')}"
+                                       for c in nbh.get("comingIrregularClosedDays") or []],
+                "free_text": nbh.get("freeText"),
+            }
 
     feeds = [v for k, v in feed.items() if k.startswith("Feed:")]
     owner_feeds = [f for f in feeds if str(f.get("feedId", "")).isdigit() and f.get("blogId") in (None, "")]
@@ -114,7 +132,8 @@ def audit(place_id):
         "directions": b.get("road"),
         "phone": b.get("phone"),
         "virtual_phone": b.get("virtualPhone"),
-        "opening_hours": b.get("openingHours"),
+        "opening_hours_legacy": b.get("openingHours"),
+        "business_hours": hours,
         # 소개글·대표키워드·홈페이지/SNS는 SSR에 실리지 않는다 (클라이언트 GraphQL로 후속 로드).
         # 실측 2026-09: 아폴로 캐시에 없음 → 스마트플레이스 센터에서 수동 확인 항목으로 둔다.
         "ssr_hidden_fields": ["소개글", "대표키워드", "홈페이지/SNS 링크"],
@@ -123,7 +142,8 @@ def audit(place_id):
         "talktalk": b.get("talktalkUrl"),
         "naver_blog": (b.get("naverBlog") or {}).get("__ref"),
         "tabs": tabs,
-        "missing_info_flags": {k: v for k, v in missing.items() if k.startswith("is") and v is True},
+        # 참고용. isBizHourMissing은 구 필드 기준이라 newBusinessHours가 있어도 true로 나온다(오탐 실측).
+        "naver_missing_flags_unreliable": {k: v for k, v in missing.items() if k.startswith("is") and v is True},
         "menus": [{"name": m.get("name"), "price": m.get("price")} for m in menus],
         "reviews": {
             "visitor_total": b.get("visitorReviewsTotal"),
@@ -156,14 +176,19 @@ def score(d):
     def row(lane, status, why):
         rows.append((lane, status, why))
 
-    # 기본 정보
-    flags = d["missing_info_flags"]
-    if d["opening_hours"] is None or flags.get("isBizHourMissing"):
-        row("기본정보", "❌", "영업시간 누락 (네이버가 missingInfo로 직접 플래그) — 순위·전환 모두 감점")
-    elif flags:
-        row("기본정보", "⚠️", f"네이버 누락 플래그: {', '.join(flags)}")
+    # 기본 정보 — 영업시간은 실제 필드(newBusinessHours)로만 판정한다
+    h = d["business_hours"]
+    filled = h.get("days_filled", 0)
+    if filled == 0 and not d["opening_hours_legacy"]:
+        row("기본정보", "❌", "영업시간 미등록 — '영업 중' 필터에서 빠지고 AI 답변에 '영업시간 정보 없음'으로 나간다")
+    elif filled < 7:
+        row("기본정보", "⚠️", f"영업시간 {filled}/7일만 입력 — 빈 요일은 휴무면 정기휴무로 명시")
     else:
-        row("기본정보", "✅", "영업시간·주소·찾아오는길·편의시설 채워짐")
+        extra = f" · 임시휴무 {len(h['irregular_closures'])}건 등록" if h.get("irregular_closures") else ""
+        row("기본정보", "✅", f"영업시간 7/7일 · 현재 '{h.get('status')}'{extra} · 주소·찾아오는길 있음")
+    other = [k for k in d["naver_missing_flags_unreliable"] if k != "isBizHourMissing"]
+    if other:
+        row("기본정보(플래그)", "⚠️", f"네이버 누락 플래그 {', '.join(other)} — 센터에서 교차 확인 (플래그 단독은 오탐 가능)")
 
     row("소개·키워드", "🔎", "SSR 미노출 — 센터 > 업체정보에서 소개글(지역+업종 자연 포함)·대표키워드 5개 채움 여부 수동 확인")
 
@@ -249,6 +274,10 @@ def main():
     for lane, status, why in score(d):
         print(f"| {lane} | {status} | {why} |")
     print()
+    h = d["business_hours"]
+    if h.get("days"):
+        print("영업시간:", " · ".join(f"{x['day']} {x['hours'] or x.get('note') or '미입력'}" for x in h["days"]),
+              f"| 임시휴무: {', '.join(h['irregular_closures']) or '없음'}")
     print("상품:", "; ".join(f"{m['name']}={m['price'] or '문의'}" for m in d["menus"]) or "없음")
     print("리뷰 테마:", ", ".join(f"{l} {c}" for l, c in d["reviews"]["themes"]) or "없음")
     print("소식 카테고리:", ", ".join(d["feed"]["categories"]) or "없음")

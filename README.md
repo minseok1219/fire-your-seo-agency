@@ -48,7 +48,7 @@ but if you serve the Korean market, half your traffic lives there.
 **SPO is this fork's addition.** For a physical business the search result is not your
 homepage — it's your Place card. But you don't host it, so there is no sitemap or robots.txt
 to fix. Instead the lane reads the data the public Place page server-renders and audits
-**Naver's own missing-info flags**, reviews, news cadence and conversion paths.
+**business hours, price list, reviews, news cadence and conversion paths**.
 No login, no API key — a `naver.me` link is enough.
 
 ## Install
@@ -87,7 +87,7 @@ touching anything:
 | GEO | ❌ | No llms.txt; GPTBot/PerplexityBot policy undecided in robots.txt |
 | LLMO | ⚠️ | Brand name spelled 3 different ways across surfaces |
 | NEO | ❌ | Not registered in Naver Search Advisor |
-| SPO | ❌ | Business hours missing (Naver missingInfo flag) · 1 business photo in the hero area |
+| SPO | ⚠️ | Prices on 3/6 products · 1 business photo in the hero area · 1 news post in 90 days |
 
 …then proposes priorities, implements them, and schedules the re-measurement.
 
