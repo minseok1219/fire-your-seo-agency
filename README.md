@@ -98,7 +98,7 @@ touching anything:
 3. **Intent landing pages** — designs pages on the "one question = one page" principle
 4. **Machine readability** — llms.txt, JSON-LD, citation-ready paragraph structure
 5. **Naver** — from Search Advisor registration to AI Briefing citation requirements
-6. **Smart Place** — zero missing flags, direct-answer description, price list, booking · TalkTalk · call paths, news cadence
+6. **Smart Place** — complete hours and address, direct-answer description, price list, booking · TalkTalk · call paths, news cadence
 7. **Measurement loop** — schedules a re-measurement and proves the change with numbers
 
 ## What it refuses to do
@@ -120,7 +120,7 @@ references/
   geo.md              ← generative engine optimization (AI crawler policy · llms.txt · primary source)
   llmo.md             ← model-knowledge optimization (brand entity)
   neo-naver.md        ← Naver (Search Advisor · AI Briefing · blog two-track)
-  spo-smartplace.md   ← Smart Place (missing flags · description · prices · reviews · news · conversion · NAP)  ★ fork addition
+  spo-smartplace.md   ← Smart Place (hours · description · prices · reviews · news · conversion · NAP)  ★ fork addition
   measure.md          ← the measurement loop (fixing it is not the finish line)
   en/                 ← English mirrors of all reference docs (for human readers)
 scripts/
