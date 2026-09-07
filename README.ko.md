@@ -6,6 +6,10 @@
 
 > **월 50~350만 원짜리 SEO·AEO 대행, 해고하세요. 당신의 AI 에이전트가 직접 합니다.**
 
+> 이 저장소는 [leopard627/fire-your-seo-agency](https://github.com/leopard627/fire-your-seo-agency)의
+> 포크입니다. 원본의 다섯 레인에 **SPO(네이버 스마트플레이스) 레인**과 진단 스크립트를
+> 추가했습니다. 오프라인 업장(체육관·식당·병원·학원)이라면 이 포크가 맞습니다.
+
 "AI 시대 검색 최적화", "챗GPT 인용 보장", "네이버 상위 노출" — 이런 문구로 월 구독료를 받는
 대행 서비스가 쏟아지고 있습니다. 그런데 그들이 하는 일의 대부분은 **공개된 표준 문서와
 반복 가능한 체크리스트**입니다. 사람이 하면 용역이지만, AI 에이전트가 하면 스킬입니다.
@@ -23,9 +27,9 @@
 
 과정은 [Threads @kindainvestor](https://www.threads.com/@kindainvestor)에서 공개적으로 기록하고 있습니다.
 
-## 다섯 레인
+## 여섯 레인
 
-같은 "검색 최적화"라도 상대하는 엔진이 다릅니다. 이 스킬은 다섯 레인을 구분해서 각각 최적화합니다.
+같은 "검색 최적화"라도 상대하는 엔진이 다릅니다. 이 스킬은 여섯 레인을 구분해서 각각 최적화합니다.
 
 | 레인 | 상대 | 핵심 질문 |
 |---|---|---|
@@ -34,16 +38,22 @@
 | **GEO** (Generative Engine) | ChatGPT, Perplexity, Claude | 생성 AI가 브라우징할 때 나를 1차 소스로 쓰는가? |
 | **LLMO** (LLM Optimization) | 모델 자체의 지식 | 모델이 내 브랜드를 알고, 정확히 아는가? |
 | **NEO** (Naver Engine) | 네이버 검색·AI 브리핑 | 한국 시장의 절반, 네이버가 나를 인용하는가? |
+| **SPO** (Smart Place) | 네이버 지도·플레이스 검색 | "○○역 크로스핏" 검색의 답인 플레이스 카드가 채워져 있는가? |
 
 **NEO는 이 스킬의 차별점입니다.** 글로벌 AEO 가이드는 네이버를 다루지 않지만,
 한국 서비스라면 트래픽의 절반이 네이버에서 옵니다.
+
+**SPO는 이 포크의 추가 레인입니다.** 오프라인 업장은 홈페이지가 아니라 플레이스 카드가
+검색 결과입니다. 그런데 플레이스는 내가 호스팅하지 않으니 sitemap도 robots.txt도 없습니다 —
+대신 공개 플레이스 페이지가 SSR로 내려주는 데이터를 읽어 **네이버가 스스로 찍은 누락 플래그**,
+리뷰·소식·전환 경로를 진단합니다. 로그인·API 키 없이 `naver.me` 링크 하나면 됩니다.
 
 ## 설치
 
 플러그인으로 (권장 — 한 줄 설치, 업데이트 쉬움):
 
 ```
-/plugin marketplace add leopard627/fire-your-seo-agency
+/plugin marketplace add minseok1219/fire-your-seo-agency
 /plugin install fire-your-seo-agency@fire-your-seo-agency
 ```
 
@@ -51,16 +61,17 @@
 
 ```bash
 # 프로젝트 스킬로 (해당 프로젝트에서만)
-git clone https://github.com/leopard627/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
+git clone https://github.com/minseok1219/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
 
 # 또는 개인 스킬로 (모든 프로젝트에서)
-git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
+git clone https://github.com/minseok1219/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
 ```
 
 그리고 Claude Code에서:
 
 ```
 /fire-your-seo-agency 내 사이트 진단해줘
+/fire-your-seo-agency 스마트플레이스 진단해줘 https://naver.me/xxxxxxx
 ```
 
 에이전트는 손대기 전에 크롤러의 눈으로 진단부터 하고, 이런 점수표를 먼저 보여줍니다:
@@ -72,6 +83,7 @@ git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skill
 | GEO | ❌ | llms.txt 없음, robots.txt에 AI 크롤러 정책 미정 |
 | LLMO | ⚠️ | 브랜드명 표기가 표면마다 3가지로 갈림 |
 | NEO | ❌ | 네이버 서치어드바이저 미등록 |
+| SPO | ❌ | 영업시간 누락(네이버 missingInfo 플래그) · 대표 영역 업체 사진 1장 |
 
 …그다음 우선순위를 제안하고, 구현하고, 재측정 일정을 잡습니다.
 
@@ -82,7 +94,8 @@ git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skill
 3. **의도 랜딩** — "질문 하나 = 페이지 하나" 원칙으로 검색 의도별 페이지를 설계합니다
 4. **기계 가독** — llms.txt, JSON-LD, 인용 가능한 문단 구조를 만듭니다
 5. **네이버** — 서치어드바이저 등록부터 AI 브리핑 인용 요건까지
-6. **측정 루프** — 고치고 끝이 아니라, 재측정 일정을 잡고 숫자로 확인합니다
+6. **스마트플레이스** — 누락 플래그 0개, 소개글 직답, 가격표, 예약·톡톡·전화 전환 경로, 소식 리듬
+7. **측정 루프** — 고치고 끝이 아니라, 재측정 일정을 잡고 숫자로 확인합니다
 
 ## 하지 않는 것
 
@@ -103,8 +116,11 @@ references/
   geo.md              ← 생성엔진 최적화 (AI 크롤러 정책·llms.txt·1차 소스)
   llmo.md             ← 모델 인지 최적화 (브랜드 엔티티)
   neo-naver.md        ← 네이버 (서치어드바이저·AI 브리핑·블로그 투트랙)
+  spo-smartplace.md   ← 스마트플레이스 (누락 플래그·소개글·가격·리뷰·소식·전환·NAP 일관성)  ★ 포크 추가
   measure.md          ← 측정 루프 (고치고 끝이 아니다)
   en/                 ← 전체 레퍼런스 영문 미러 (사람 독자용)
+scripts/
+  place-audit.py      ← 플레이스 공개 페이지를 크롤러의 눈으로 읽는 진단 스크립트 (표준 라이브러리 + curl)  ★ 포크 추가
 .claude-plugin/       ← 플러그인·마켓플레이스 매니페스트 (/plugin 설치 지원)
 ```
 
@@ -113,4 +129,4 @@ references/
 
 ## 라이선스
 
-MIT — 마음껏 쓰고, 대행비는 아끼세요.
+MIT — 마음껏 쓰고, 대행비는 아끼세요. 원본 저작: [leopard627](https://github.com/leopard627).

@@ -1,6 +1,6 @@
 ---
 name: fire-your-seo-agency
-description: SEO·AEO·GEO·LLMO·NEO(네이버) 다섯 레인을 진단하고 직접 구현하는 스킬. 사이트를 검색엔진·답변엔진·생성 AI·네이버 AI 브리핑이 인용하는 1차 소스로 만든다. "SEO 해줘", "AI에 인용되게 해줘", "네이버 노출 늘려줘", "llms.txt 만들어줘" 류 요청에 사용. Use for "audit my site's SEO", "get my site cited by ChatGPT/Perplexity/AI Overviews", "improve search visibility", "create llms.txt", "answer engine / generative engine optimization", and any AI-search-visibility request.
+description: SEO·AEO·GEO·LLMO·NEO(네이버)·SPO(스마트플레이스) 여섯 레인을 진단하고 직접 구현하는 스킬. 사이트를 검색엔진·답변엔진·생성 AI·네이버 AI 브리핑이 인용하는 1차 소스로 만들고, 오프라인 업장이면 네이버 플레이스 카드까지 채운다. "SEO 해줘", "AI에 인용되게 해줘", "네이버 노출 늘려줘", "llms.txt 만들어줘", "스마트플레이스 진단해줘", "플레이스 순위 올려줘" 류 요청에 사용. Use for "audit my site's SEO", "get my site cited by ChatGPT/Perplexity/AI Overviews", "improve search visibility", "create llms.txt", "answer engine / generative engine optimization", "audit my Naver Smart Place", and any AI-search-visibility request.
 ---
 
 # fire-your-seo-agency — 운영 절차
@@ -43,12 +43,21 @@ curl -s -o /dev/null -w '%{http_code}' https://example.com/없는페이지  # 40
 **noindex는 최우선 점검이다** — 스테이징용 `noindex`가 프로덕션에 배포된 사고는
 다른 모든 최적화를 무효로 만든다. `<meta name="robots">`와 `X-Robots-Tag` 헤더 둘 다 봐야 한다.
 
+**오프라인 업장이면 SPO 레인을 추가한다.** 사용자가 네이버 플레이스 URL(`naver.me/…`,
+`map.naver.com/…`, `m.place.naver.com/place/{id}`)을 주거나, 체육관·식당·병원·학원처럼
+"지역 + 업종"으로 검색되는 업종이면 도메인이 없어도 진단 대상이다:
+
+```bash
+python3 scripts/place-audit.py https://naver.me/xxxxxxx   # 짧은 링크·지도 URL·숫자 ID 모두 가능
+```
+
 점수표 형식 (레인별 ✅/⚠️/❌ + 한 줄 근거):
 
 | 레인 | 상태 | 근거 |
 |---|---|---|
 | SEO | ⚠️ | 본문은 SSR이나 사이트맵에 상세 페이지 누락 |
 | AEO | ❌ | FAQ 구조화 데이터 0건 |
+| SPO | ❌ | 영업시간 누락(네이버 missingInfo 플래그) · 대표 영역 업체 사진 1장 |
 | … | | |
 
 진단 후 사용자에게 **우선순위 제안**을 하고 승인받아 진행한다. 코드베이스 접근이 가능하면
@@ -79,6 +88,16 @@ JSON-LD → canonical → 함정 점검(404 캐시 베이크, CSR 바일아웃).
 한국 시장 대상 사이트면 필수. `references/neo-naver.md`를 읽고 실행한다.
 서치어드바이저 등록은 사용자 계정이 필요하므로 절차를 안내하고, 나머지(사이트맵 제출 형식,
 모바일 최적화, AI 브리핑 인용 요건)는 직접 구현한다.
+
+## Phase 4.5 — SPO (네이버 스마트플레이스)
+
+오프라인 업장이면 필수. `references/spo-smartplace.md`를 읽고 실행한다. 순서:
+`scripts/place-audit.py`로 점수표 → **네이버 누락 플래그(`missingInfo`) 0개**가 첫 목표 →
+소개글 첫 문장 직답 + 대표키워드 5개(🔎 센터에서 수동 확인) → 가격표 숫자화 → 전환 경로
+3종(예약·톡톡·전화) → 소식 월 2회 리듬. 센터(smartplace.naver.com) 수정은 사용자 계정이
+필요하므로 **바꿀 값을 필드 단위로 써서 전달**하고, 자기 도메인이 있으면 `LocalBusiness`
+JSON-LD의 `sameAs`에 플레이스 URL을 넣는 것까지 직접 구현한다.
+순위는 네이버 비공개 로직이다 — "고치면 오른다"가 아니라 "누락 0 + 재측정"으로 보고한다.
 
 ## Phase 5 — 측정 루프
 

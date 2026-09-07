@@ -6,6 +6,10 @@
 
 > **Paying $400–$2,500/month for an SEO or "AI visibility" agency? Fire them. Your AI agent can do the work.**
 
+> This is a fork of [leopard627/fire-your-seo-agency](https://github.com/leopard627/fire-your-seo-agency)
+> that adds an **SPO (Naver Smart Place) lane** and an audit script on top of the original five lanes.
+> If you run a physical business in Korea (gym, restaurant, clinic, academy), this fork is for you.
+
 A wave of services now charges monthly retainers for "AI-era search optimization",
 "guaranteed ChatGPT citations", and "LLM visibility". Most of what they actually do is
 **public standards and repeatable checklists**. When a human does it, it's a retainer.
@@ -24,10 +28,10 @@ This is not theory. The same playbook, applied to [Chickenstock](https://www.chi
 
 The journey is documented publicly on [Threads @kindainvestor](https://www.threads.com/@kindainvestor).
 
-## The five lanes
+## The six lanes
 
 "Search optimization" means different things to different engines. This skill treats them
-as five distinct lanes:
+as six distinct lanes:
 
 | Lane | Target | The question it answers |
 |---|---|---|
@@ -36,16 +40,23 @@ as five distinct lanes:
 | **GEO** (Generative Engine) | ChatGPT, Perplexity, Claude | When generative AI browses, am I the primary source? |
 | **LLMO** (LLM Optimization) | The model's own knowledge | Does the model know my brand — and know it correctly? |
 | **NEO** (Naver Engine) | Naver search & AI Briefing | Half of the Korean market — does Naver cite me? |
+| **SPO** (Smart Place) | Naver Map & Place search | For "crossfit near ○○ station", is my Place card complete? |
 
 **NEO is what makes this skill different.** Global AEO guides ignore Naver entirely,
 but if you serve the Korean market, half your traffic lives there.
+
+**SPO is this fork's addition.** For a physical business the search result is not your
+homepage — it's your Place card. But you don't host it, so there is no sitemap or robots.txt
+to fix. Instead the lane reads the data the public Place page server-renders and audits
+**Naver's own missing-info flags**, reviews, news cadence and conversion paths.
+No login, no API key — a `naver.me` link is enough.
 
 ## Install
 
 As a plugin (recommended — one command, easy updates):
 
 ```
-/plugin marketplace add leopard627/fire-your-seo-agency
+/plugin marketplace add minseok1219/fire-your-seo-agency
 /plugin install fire-your-seo-agency@fire-your-seo-agency
 ```
 
@@ -53,16 +64,17 @@ Or via git clone:
 
 ```bash
 # As a project skill (this project only)
-git clone https://github.com/leopard627/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
+git clone https://github.com/minseok1219/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
 
 # Or as a personal skill (every project)
-git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
+git clone https://github.com/minseok1219/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
 ```
 
 Then in Claude Code:
 
 ```
 /fire-your-seo-agency audit my site
+/fire-your-seo-agency audit my Naver Smart Place https://naver.me/xxxxxxx
 ```
 
 Your agent starts with a crawler-eye audit and returns a scorecard like this before
@@ -75,6 +87,7 @@ touching anything:
 | GEO | ❌ | No llms.txt; GPTBot/PerplexityBot policy undecided in robots.txt |
 | LLMO | ⚠️ | Brand name spelled 3 different ways across surfaces |
 | NEO | ❌ | Not registered in Naver Search Advisor |
+| SPO | ❌ | Business hours missing (Naver missingInfo flag) · 1 business photo in the hero area |
 
 …then proposes priorities, implements them, and schedules the re-measurement.
 
@@ -85,7 +98,8 @@ touching anything:
 3. **Intent landing pages** — designs pages on the "one question = one page" principle
 4. **Machine readability** — llms.txt, JSON-LD, citation-ready paragraph structure
 5. **Naver** — from Search Advisor registration to AI Briefing citation requirements
-6. **Measurement loop** — schedules a re-measurement and proves the change with numbers
+6. **Smart Place** — zero missing flags, direct-answer description, price list, booking · TalkTalk · call paths, news cadence
+7. **Measurement loop** — schedules a re-measurement and proves the change with numbers
 
 ## What it refuses to do
 
@@ -106,8 +120,11 @@ references/
   geo.md              ← generative engine optimization (AI crawler policy · llms.txt · primary source)
   llmo.md             ← model-knowledge optimization (brand entity)
   neo-naver.md        ← Naver (Search Advisor · AI Briefing · blog two-track)
+  spo-smartplace.md   ← Smart Place (missing flags · description · prices · reviews · news · conversion · NAP)  ★ fork addition
   measure.md          ← the measurement loop (fixing it is not the finish line)
   en/                 ← English mirrors of all reference docs (for human readers)
+scripts/
+  place-audit.py      ← crawler-eye audit of the public Place page (stdlib + curl)  ★ fork addition
 .claude-plugin/       ← plugin & marketplace manifests (/plugin install support)
 ```
 
@@ -116,4 +133,4 @@ references/
 
 ## License
 
-MIT — use it freely, and keep the retainer money.
+MIT — use it freely, and keep the retainer money. Original work by [leopard627](https://github.com/leopard627).

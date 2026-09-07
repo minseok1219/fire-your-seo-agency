@@ -1,13 +1,15 @@
 {
   "name": "fire-your-seo-agency",
-  "description": "Fire your SEO agency — a Claude Code skill that audits and implements SEO·AEO·GEO·LLMO·NEO(Naver) itself.",
-  "owner": { "name": "leopard627" },
+  "description": "Fire your SEO agency — audits and implements SEO·AEO·GEO·LLMO·NEO(Naver)·SPO(Naver Smart Place) itself.",
+  "owner": {
+    "name": "minseok1219"
+  },
   "plugins": [
     {
       "name": "fire-your-seo-agency",
       "source": "./",
-      "description": "Fire your SEO agency — audits and implements SEO·AEO·GEO·LLMO·NEO(Naver) itself. Crawler-eye audit, intent landing pages, llms.txt, structured data, Naver AI Briefing, measurement loop.",
-      "version": "1.1.0"
+      "description": "Fire your SEO agency — audits and implements SEO·AEO·GEO·LLMO·NEO(Naver)·SPO(Naver Smart Place) itself. Crawler-eye audit, intent landing pages, llms.txt, structured data, Naver AI Briefing, Smart Place card audit, measurement loop.",
+      "version": "1.2.0"
     }
   ]
 }
